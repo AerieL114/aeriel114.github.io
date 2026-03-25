@@ -1,0 +1,29 @@
+.DS_Store
+
+# IDE / Editor
+.vscode/
+.idea/
+*.iml
+
+# Maven / Java build output
+target/
+out/
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Postman 
+.postman/
+
+# OS / temp files
+*.swp
+*.swo
+*~
+tmp/
+temp/
