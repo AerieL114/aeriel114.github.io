@@ -22,6 +22,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class OrderService {
 
     private static final String ORDER_TOPIC = "notificationTopic";
+    private static final String ORDER_EVENTS_TOPIC = "order-events";
     private static final DateTimeFormatter ORDER_NUMBER_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
 
     private final OrderRepository orderRepository;
@@ -93,8 +94,9 @@ public class OrderService {
             throw ex;
         }
 
-        orderRepository.save(order);
-        sendNotification(order.getOrderNumber());
+        Order savedOrder = orderRepository.save(order);
+        sendOrderCreatedEvent(savedOrder);
+        sendNotification(savedOrder.getOrderNumber());
         return "Order Placed";
     }
 
@@ -162,6 +164,23 @@ public class OrderService {
             kafkaTemplate.send(ORDER_TOPIC, payload);
         } catch (JsonProcessingException ex) {
             throw new IllegalStateException("Failed to serialize notification event", ex);
+        }
+    }
+
+    private void sendOrderCreatedEvent(Order order) {
+        OrderCreatedEvent event = new OrderCreatedEvent();
+        event.setEventType("order.created");
+        event.setOrderId(order.getId());
+        event.setOrderNumber(order.getOrderNumber());
+        event.setStatus(order.getStatus());
+        event.setItems(order.getOrderLineItemsList().stream().map(this::mapToDto).collect(Collectors.toList()));
+        event.setOccurredAt(LocalDateTime.now());
+
+        try {
+            String payload = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send(ORDER_EVENTS_TOPIC, payload);
+        } catch (JsonProcessingException ex) {
+            throw new IllegalStateException("Failed to serialize order created event", ex);
         }
     }
 

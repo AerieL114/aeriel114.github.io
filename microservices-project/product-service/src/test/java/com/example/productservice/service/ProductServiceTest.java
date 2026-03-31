@@ -2,7 +2,9 @@ package com.example.productservice.service;
 
 import com.example.productservice.dto.ProductRequest;
 import com.example.productservice.dto.ProductResponse;
+import com.example.productservice.dto.ProductVariantRequest;
 import com.example.productservice.model.Product;
+import com.example.productservice.model.ProductVariant;
 import com.example.productservice.repository.ProductRepository;
 import java.math.BigDecimal;
 import java.util.List;
@@ -25,6 +27,9 @@ class ProductServiceTest {
     @Mock
     private ProductRepository productRepository;
 
+    @Mock
+    private ProductEventPublisher productEventPublisher;
+
     @InjectMocks
     private ProductService productService;
 
@@ -33,23 +38,15 @@ class ProductServiceTest {
         ProductRequest request = new ProductRequest();
         request.setName("iPhone 13");
         request.setDescription("iPhone 13");
-        request.setPrice(BigDecimal.valueOf(1200));
-        request.setSkuCode("ts001_black_m");
         request.setCategory("ao-thun");
-        request.setSize("M");
-        request.setColor("black");
-        request.setImageUrl("/assets/products/ts001_black_m.jpg");
+        request.setVariants(List.of(buildVariantRequest("ts001_black_m", BigDecimal.valueOf(1200), "M", "black")));
 
         Product saved = new Product();
         saved.setId(1L);
         saved.setName(request.getName());
         saved.setDescription(request.getDescription());
-        saved.setPrice(request.getPrice());
-        saved.setSkuCode(request.getSkuCode());
         saved.setCategory(request.getCategory());
-        saved.setSize(request.getSize());
-        saved.setColor(request.getColor());
-        saved.setImageUrl(request.getImageUrl());
+        saved.setVariants(List.of(buildVariant("ts001_black_m", BigDecimal.valueOf(1200), "M", "black")));
 
         when(productRepository.save(any(Product.class))).thenReturn(saved);
 
@@ -57,11 +54,10 @@ class ProductServiceTest {
 
         assertNotNull(response.getId());
         assertEquals("iPhone 13", response.getName());
-        assertEquals(BigDecimal.valueOf(1200), response.getPrice());
-        assertEquals("ts001_black_m", response.getSkuCode());
         assertEquals("ao-thun", response.getCategory());
-        assertEquals("M", response.getSize());
-        assertEquals("black", response.getColor());
+        assertEquals(1, response.getVariants().size());
+        assertEquals("ts001_black_m", response.getVariants().get(0).getSkuCode());
+        assertEquals(BigDecimal.valueOf(1200), response.getVariants().get(0).getPrice());
     }
 
     @Test
@@ -70,12 +66,8 @@ class ProductServiceTest {
         product.setId(1L);
         product.setName("iPhone 13");
         product.setDescription("iPhone 13");
-        product.setPrice(BigDecimal.valueOf(1200));
-        product.setSkuCode("ts001_black_m");
         product.setCategory("ao-thun");
-        product.setSize("M");
-        product.setColor("black");
-        product.setImageUrl("/assets/products/ts001_black_m.jpg");
+        product.setVariants(List.of(buildVariant("ts001_black_m", BigDecimal.valueOf(1200), "M", "black")));
 
         when(productRepository.findAll()).thenReturn(List.of(product));
 
@@ -92,12 +84,8 @@ class ProductServiceTest {
         product.setId(productId);
         product.setName("Ao thun basic");
         product.setDescription("Ao thun cotton");
-        product.setPrice(BigDecimal.valueOf(199));
-        product.setSkuCode("ts001_black_m");
         product.setCategory("ao-thun");
-        product.setSize("M");
-        product.setColor("black");
-        product.setImageUrl("/assets/products/ts001_black_m.jpg");
+        product.setVariants(List.of(buildVariant("ts001_black_m", BigDecimal.valueOf(199), "M", "black")));
 
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
@@ -114,22 +102,14 @@ class ProductServiceTest {
         existingProduct.setId(productId);
         existingProduct.setName("Ao thun basic");
         existingProduct.setDescription("Ao thun cotton");
-        existingProduct.setPrice(BigDecimal.valueOf(199));
-        existingProduct.setSkuCode("ts001_black_m");
         existingProduct.setCategory("ao-thun");
-        existingProduct.setSize("M");
-        existingProduct.setColor("black");
-        existingProduct.setImageUrl("/assets/products/ts001_black_m.jpg");
+        existingProduct.setVariants(List.of(buildVariant("ts001_black_m", BigDecimal.valueOf(199), "M", "black")));
 
         ProductRequest request = new ProductRequest();
         request.setName("Ao thun oversize");
         request.setDescription("Ao thun oversize cotton");
-        request.setPrice(BigDecimal.valueOf(249));
-        request.setSkuCode("ts001_white_l");
         request.setCategory("ao-thun");
-        request.setSize("L");
-        request.setColor("white");
-        request.setImageUrl("/assets/products/ts001_white_l.jpg");
+        request.setVariants(List.of(buildVariantRequest("ts001_white_l", BigDecimal.valueOf(249), "L", "white")));
 
         when(productRepository.findById(productId)).thenReturn(Optional.of(existingProduct));
         when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -137,10 +117,11 @@ class ProductServiceTest {
         ProductResponse response = productService.updateProduct(productId, request);
 
         assertEquals("Ao thun oversize", response.getName());
-        assertEquals(BigDecimal.valueOf(249), response.getPrice());
-        assertEquals("ts001_white_l", response.getSkuCode());
-        assertEquals("L", response.getSize());
-        assertEquals("white", response.getColor());
+        assertEquals(1, response.getVariants().size());
+        assertEquals(BigDecimal.valueOf(249), response.getVariants().get(0).getPrice());
+        assertEquals("ts001_white_l", response.getVariants().get(0).getSkuCode());
+        assertEquals("L", response.getVariants().get(0).getSize());
+        assertEquals("white", response.getVariants().get(0).getColor());
     }
 
     @Test
@@ -150,17 +131,33 @@ class ProductServiceTest {
         product.setId(productId);
         product.setName("Ao thun basic");
         product.setDescription("Ao thun cotton");
-        product.setPrice(BigDecimal.valueOf(199));
-        product.setSkuCode("ts001_black_m");
         product.setCategory("ao-thun");
-        product.setSize("M");
-        product.setColor("black");
-        product.setImageUrl("/assets/products/ts001_black_m.jpg");
+        product.setVariants(List.of(buildVariant("ts001_black_m", BigDecimal.valueOf(199), "M", "black")));
 
         when(productRepository.findById(productId)).thenReturn(Optional.of(product));
 
         productService.deleteProduct(productId);
 
         verify(productRepository).delete(product);
+    }
+
+    private ProductVariantRequest buildVariantRequest(String skuCode, BigDecimal price, String size, String color) {
+        ProductVariantRequest request = new ProductVariantRequest();
+        request.setSkuCode(skuCode);
+        request.setPrice(price);
+        request.setSize(size);
+        request.setColor(color);
+        request.setImageUrl("/assets/products/" + skuCode + ".jpg");
+        return request;
+    }
+
+    private ProductVariant buildVariant(String skuCode, BigDecimal price, String size, String color) {
+        ProductVariant variant = new ProductVariant();
+        variant.setSkuCode(skuCode);
+        variant.setPrice(price);
+        variant.setSize(size);
+        variant.setColor(color);
+        variant.setImageUrl("/assets/products/" + skuCode + ".jpg");
+        return variant;
     }
 }

@@ -22,7 +22,19 @@ public class Inventory {
     private String skuCode;
 
     @Column(nullable = false)
-    private Integer quantity;
+    private String warehouseId = "default";
+
+    @Column(nullable = false)
+    private Integer quantityOnHand;
+
+    @Column(nullable = false)
+    private Integer quantityReserved = 0;
+
+    @Column(nullable = false)
+    private Integer reorderPoint = 10;
+
+    @Column(nullable = false)
+    private Integer reorderQuantity = 50;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false, columnDefinition = "timestamp default current_timestamp")
@@ -48,12 +60,58 @@ public class Inventory {
         this.skuCode = skuCode;
     }
 
+    public String getWarehouseId() {
+        return warehouseId;
+    }
+
+    public void setWarehouseId(String warehouseId) {
+        this.warehouseId = warehouseId;
+    }
+
+    public Integer getQuantityOnHand() {
+        return quantityOnHand;
+    }
+
+    public void setQuantityOnHand(Integer quantityOnHand) {
+        this.quantityOnHand = quantityOnHand;
+    }
+
+    public Integer getQuantityReserved() {
+        return quantityReserved;
+    }
+
+    public void setQuantityReserved(Integer quantityReserved) {
+        this.quantityReserved = quantityReserved;
+    }
+
+    public Integer getQuantityAvailable() {
+        int onHand = quantityOnHand == null ? 0 : quantityOnHand;
+        int reserved = quantityReserved == null ? 0 : quantityReserved;
+        return onHand - reserved;
+    }
+
+    public Integer getReorderPoint() {
+        return reorderPoint;
+    }
+
+    public void setReorderPoint(Integer reorderPoint) {
+        this.reorderPoint = reorderPoint;
+    }
+
+    public Integer getReorderQuantity() {
+        return reorderQuantity;
+    }
+
+    public void setReorderQuantity(Integer reorderQuantity) {
+        this.reorderQuantity = reorderQuantity;
+    }
+
     public Integer getQuantity() {
-        return quantity;
+        return quantityOnHand;
     }
 
     public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
+        this.quantityOnHand = quantity;
     }
 
     public LocalDateTime getCreatedAt() {

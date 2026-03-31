@@ -3,7 +3,10 @@ package com.example.inventoryservice.controller;
 import com.example.inventoryservice.dto.InventoryDeductionRequest;
 import com.example.inventoryservice.dto.InventoryItemResponse;
 import com.example.inventoryservice.dto.InventoryRequest;
+import com.example.inventoryservice.dto.InventoryReservationActionRequest;
+import com.example.inventoryservice.dto.InventoryReservationRequest;
 import com.example.inventoryservice.dto.InventoryResponse;
+import com.example.inventoryservice.dto.ReservationResponse;
 import com.example.inventoryservice.service.InventoryService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -51,6 +54,23 @@ public class InventoryController {
     @PostMapping("/deduct")
     public ResponseEntity<Void> deductInventory(@RequestBody List<InventoryDeductionRequest> requests) {
         inventoryService.deductInventory(requests);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/reserve")
+    public ResponseEntity<ReservationResponse> reserveInventory(@RequestBody InventoryReservationRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(inventoryService.reserveInventory(request));
+    }
+
+    @PostMapping("/confirm")
+    public ResponseEntity<Void> confirmReservation(@RequestBody InventoryReservationActionRequest request) {
+        inventoryService.confirmReservation(request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/release")
+    public ResponseEntity<Void> releaseReservation(@RequestBody InventoryReservationActionRequest request) {
+        inventoryService.releaseReservation(request);
         return ResponseEntity.noContent().build();
     }
 

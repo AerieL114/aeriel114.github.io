@@ -1,17 +1,13 @@
 package com.example.productservice.dto;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 public class ProductRequest {
 
     private String name;
     private String description;
-    private BigDecimal price;
-    private String skuCode;
     private String category;
-    private String size;
-    private String color;
-    private String imageUrl;
+    private List<ProductVariantRequest> variants;
 
     public String getName() {
         return name;
@@ -29,22 +25,6 @@ public class ProductRequest {
         this.description = description;
     }
 
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public String getSkuCode() {
-        return skuCode;
-    }
-
-    public void setSkuCode(String skuCode) {
-        this.skuCode = skuCode;
-    }
-
     public String getCategory() {
         return category;
     }
@@ -53,27 +33,11 @@ public class ProductRequest {
         this.category = category;
     }
 
-    public String getSize() {
-        return size;
+    public List<ProductVariantRequest> getVariants() {
+        return variants;
     }
 
-    public void setSize(String size) {
-        this.size = size;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setVariants(List<ProductVariantRequest> variants) {
+        this.variants = variants;
     }
 }

@@ -1,19 +1,15 @@
 package com.example.productservice.dto;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ProductResponse {
 
     private Long id;
     private String name;
     private String description;
-    private BigDecimal price;
-    private String skuCode;
     private String category;
-    private String size;
-    private String color;
-    private String imageUrl;
+    private List<ProductVariantResponse> variants;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -24,24 +20,16 @@ public class ProductResponse {
         Long id,
         String name,
         String description,
-        BigDecimal price,
-        String skuCode,
         String category,
-        String size,
-        String color,
-        String imageUrl,
+        List<ProductVariantResponse> variants,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
     ) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.price = price;
-        this.skuCode = skuCode;
         this.category = category;
-        this.size = size;
-        this.color = color;
-        this.imageUrl = imageUrl;
+        this.variants = variants;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -70,22 +58,6 @@ public class ProductResponse {
         this.description = description;
     }
 
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public String getSkuCode() {
-        return skuCode;
-    }
-
-    public void setSkuCode(String skuCode) {
-        this.skuCode = skuCode;
-    }
-
     public String getCategory() {
         return category;
     }
@@ -94,28 +66,12 @@ public class ProductResponse {
         this.category = category;
     }
 
-    public String getSize() {
-        return size;
+    public List<ProductVariantResponse> getVariants() {
+        return variants;
     }
 
-    public void setSize(String size) {
-        this.size = size;
-    }
-
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setVariants(List<ProductVariantResponse> variants) {
+        this.variants = variants;
     }
 
     public LocalDateTime getCreatedAt() {

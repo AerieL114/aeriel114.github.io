@@ -1,39 +1,45 @@
 package com.example.productservice.model;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
-@Table(name = "products")
-public class Product {
+@Table(name = "product_variants")
+public class ProductVariant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String name;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+
+    @Column(nullable = false, unique = true)
+    private String skuCode;
 
     @Column(nullable = false)
-    private String description;
+    private String size;
 
     @Column(nullable = false)
-    private String category;
+    private String color;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<ProductVariant> variants = new ArrayList<>();
+    @Column(nullable = false)
+    private String imageUrl;
+
+    @Column(nullable = false)
+    private BigDecimal price;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false, columnDefinition = "timestamp default current_timestamp")
@@ -51,43 +57,52 @@ public class Product {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public Product getProduct() {
+        return product;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setProduct(Product product) {
+        this.product = product;
     }
 
-    public String getDescription() {
-        return description;
+    public String getSkuCode() {
+        return skuCode;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setSkuCode(String skuCode) {
+        this.skuCode = skuCode;
     }
 
-    public String getCategory() {
-        return category;
+    public String getSize() {
+        return size;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setSize(String size) {
+        this.size = size;
     }
 
-    public List<ProductVariant> getVariants() {
-        return variants;
+    public String getColor() {
+        return color;
     }
 
-    public void setVariants(List<ProductVariant> variants) {
-        this.variants.clear();
-        if (variants == null) {
-            return;
-        }
-        for (ProductVariant variant : variants) {
-            variant.setProduct(this);
-            this.variants.add(variant);
-        }
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
     }
 
     public LocalDateTime getCreatedAt() {

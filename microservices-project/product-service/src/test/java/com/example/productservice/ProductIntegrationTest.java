@@ -2,11 +2,14 @@ package com.example.productservice;
 
 import com.example.productservice.dto.ProductRequest;
 import com.example.productservice.dto.ProductResponse;
+import com.example.productservice.dto.ProductVariantRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.math.BigDecimal;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,12 +36,8 @@ class ProductIntegrationTest {
         ProductRequest request = new ProductRequest();
         request.setName("iPhone 13");
         request.setDescription("iPhone 13");
-        request.setPrice(java.math.BigDecimal.valueOf(1200));
-        request.setSkuCode("ts001_black_m");
         request.setCategory("ao-thun");
-        request.setSize("M");
-        request.setColor("black");
-        request.setImageUrl("/assets/products/ts001_black_m.jpg");
+        request.setVariants(List.of(buildVariant("ts001_black_m", BigDecimal.valueOf(1200), "M", "black")));
 
         String body = objectMapper.writeValueAsString(request);
 
@@ -77,17 +76,14 @@ class ProductIntegrationTest {
         ProductResponse[] products = objectMapper.readValue(getResponse.body(), ProductResponse[].class);
         assertTrue(products.length > 0);
         assertEquals("iPhone 13", products[0].getName());
-        assertEquals("ts001_black_m", products[0].getSkuCode());
+        assertEquals(1, products[0].getVariants().size());
+        assertEquals("ts001_black_m", products[0].getVariants().get(0).getSkuCode());
 
         ProductRequest updateRequest = new ProductRequest();
         updateRequest.setName("Ao thun oversize");
         updateRequest.setDescription("Ao thun oversize cotton");
-        updateRequest.setPrice(java.math.BigDecimal.valueOf(249));
-        updateRequest.setSkuCode("ts001_white_l");
         updateRequest.setCategory("ao-thun");
-        updateRequest.setSize("L");
-        updateRequest.setColor("white");
-        updateRequest.setImageUrl("/assets/products/ts001_white_l.jpg");
+        updateRequest.setVariants(List.of(buildVariant("ts001_white_l", BigDecimal.valueOf(249), "L", "white")));
 
         HttpRequest putRequest = HttpRequest.newBuilder()
             .uri(URI.create("http://localhost:" + port + "/api/product/" + created.getId()))
@@ -100,8 +96,8 @@ class ProductIntegrationTest {
 
         ProductResponse updated = objectMapper.readValue(putResponse.body(), ProductResponse.class);
         assertEquals("Ao thun oversize", updated.getName());
-        assertEquals("ts001_white_l", updated.getSkuCode());
-        assertEquals("L", updated.getSize());
+        assertEquals("ts001_white_l", updated.getVariants().get(0).getSkuCode());
+        assertEquals("L", updated.getVariants().get(0).getSize());
 
         HttpRequest deleteRequest = HttpRequest.newBuilder()
             .uri(URI.create("http://localhost:" + port + "/api/product/" + created.getId()))
@@ -110,5 +106,15 @@ class ProductIntegrationTest {
 
         HttpResponse<String> deleteResponse = client.send(deleteRequest, HttpResponse.BodyHandlers.ofString());
         assertEquals(HttpStatus.NO_CONTENT.value(), deleteResponse.statusCode());
+    }
+
+    private ProductVariantRequest buildVariant(String skuCode, BigDecimal price, String size, String color) {
+        ProductVariantRequest variant = new ProductVariantRequest();
+        variant.setSkuCode(skuCode);
+        variant.setPrice(price);
+        variant.setSize(size);
+        variant.setColor(color);
+        variant.setImageUrl("/assets/products/" + skuCode + ".jpg");
+        return variant;
     }
 }
